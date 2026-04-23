@@ -27,6 +27,12 @@
 
 > **Most multi-agent repos create more noise. ForgeFlow AI creates more focus.**
 
+<br />
+
+![ForgeFlow AI running 6 workers in a tiled tmux layout](docs/hero.png)
+
+<br />
+
 [Quick Start](#-quick-start) · [The Team](#-the-team) · [Usage](#-example-usage) · [Multi-language setup](#-multi-language-readme-setup) · [Türkçe README](README.tr.md)
 
 </div>
@@ -102,64 +108,187 @@ The `frontend-web` and `mobile-react-native` agents refuse to ship hardcoded col
 
 ---
 
+## 🎬 Demo
+
+![ForgeFlow AI demo](docs/demo.gif)
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
 
 - [Claude Code](https://claude.com/claude-code) installed and signed in.
 - Any project you want to work on (Next.js, NestJS, Expo, React Native CLI, monorepo, anything).
+- **tmux** (recommended) for the split-pane layout. The installer offers to install it automatically. To install manually:
 
-### 2. Install ForgeFlow AI in your project
+| Platform | Command |
+|---|---|
+| macOS (Homebrew) | `brew install tmux` |
+| Ubuntu / Debian | `sudo apt-get install tmux` |
+| Fedora | `sudo dnf install tmux` |
+| Arch | `sudo pacman -S tmux` |
+| Alpine | `sudo apk add tmux` |
+| Windows + MSYS2 | `pacman -S tmux` |
+| Windows + WSL | run the Ubuntu/Debian command inside WSL |
+| Windows (native) | tmux is not available, use `--windows` mode with Windows Terminal |
 
-**Option A: clone into a new project**
+### 2. Install with one command
+
+From the root of any project:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/berkcangumusisik/forge-flow-ai/main/install.sh | bash
+```
+
+Or pass a target directory:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/berkcangumusisik/forge-flow-ai/main/install.sh | bash -s -- /path/to/project
+```
+
+The installer will:
+
+1. Copy `.claude/` and `CLAUDE.md` into your project.
+2. Set up the inter-terminal message bus at `.forgeflow/`.
+3. Open **5 Claude Code worker terminals**, one per worker: `repo-inspector`, `frontend-web`, `backend`, `mobile-react-native`, `reviewer`.
+
+#### Manual install (alternative)
 
 ```bash
 git clone https://github.com/berkcangumusisik/forge-flow-ai.git
 cd forge-flow-ai
+./install.sh /path/to/your/project
 ```
 
-**Option B: drop the `.claude` folder into an existing project**
+#### Installer flags
+
+```text
+./install.sh [target-dir] [--no-spawn] [--tmux|--windows] [--workers=<set>]
+```
+
+| Flag | Effect |
+|---|---|
+| `--no-spawn` | Copy files only, do not open terminals |
+| `--tmux` | Force the tmux tiled layout (single window, all panes on one screen) |
+| `--windows` | Force separate terminal windows |
+| `--workers=<set>` | Choose which workers to spawn (see presets below) |
+
+Default: uses tmux if available (offers to install it), otherwise separate windows. All 5 workers by default.
+
+#### Worker presets
+
+Pick the smallest set your task needs. Smaller set = bigger panes = easier on the eyes.
+
+| Preset | Workers spawned |
+|---|---|
+| `--workers=web` | `frontend-web`, `reviewer` |
+| `--workers=backend` | `backend`, `reviewer` |
+| `--workers=backend-only` | `backend` |
+| `--workers=full-stack` | `frontend-web`, `backend`, `reviewer` |
+| `--workers=mobile` | `mobile-react-native`, `reviewer` |
+| `--workers=all` | all 5 (default) |
+| `--workers=a,b,c` | custom, comma-separated worker names |
+
+#### Examples
 
 ```bash
-# from the root of your project
-git clone --depth=1 https://github.com/berkcangumusisik/forge-flow-ai.git /tmp/forge-flow-ai
-cp -R /tmp/forge-flow-ai/.claude ./
-cp /tmp/forge-flow-ai/CLAUDE.md ./
-rm -rf /tmp/forge-flow-ai
+# Full stack (web + backend)
+./install.sh ~/Desktop/my-app --tmux --workers=full-stack
+
+# Landing page or pure web work
+./install.sh ~/Desktop/site --tmux --workers=web
+
+# Pure API project
+./install.sh ~/Desktop/api --tmux --workers=backend
+
+# Mobile only
+./install.sh ~/Desktop/mobile-app --tmux --workers=mobile
+
+# Custom set
+./install.sh ~/Desktop/proj --tmux --workers=frontend-web,backend,reviewer
+
+# All 5 workers, tmux layout
+./install.sh ~/Desktop/proj --tmux
 ```
 
-**Option C: add as a git submodule (advanced)**
+The file-based bus is always installed with inboxes for every worker, even ones you did not spawn. You can spawn more workers later by re-running the installer with a different `--workers` set.
 
-```bash
-git submodule add https://github.com/berkcangumusisik/forge-flow-ai.git .forge-flow-ai
-ln -s .forge-flow-ai/.claude .claude
-ln -s .forge-flow-ai/CLAUDE.md CLAUDE.md
-```
+### 3. Run your first task
 
-### 3. Open the project in Claude Code
-
-```bash
-claude
-```
-
-Claude Code picks up `.claude/commands/`, `.claude/agents/`, and `.claude/skills/` automatically. You should see `/forgeflow` in the command list.
-
-### 4. Run your first task
-
-Inside Claude Code, type:
+In any of the 5 terminals, type:
 
 ```text
 /forgeflow add a settings page with theme toggle and language switcher
 ```
 
-ForgeFlow AI will:
+The `supervisor` classifies the task, activates only the workers needed, and routes the work. Every worker ends with `DONE:<agent>:<task-id>`.
 
-1. Classify the task.
-2. Run `repo-inspector` if the area is unfamiliar.
-3. Activate only the workers it needs.
-4. Implement the change inside strict scopes.
-5. Run `reviewer` on the diff.
-6. Report back with `DONE:<agent>:<task-id>` markers.
+---
+
+## 📡 Inter-terminal communication
+
+The 5 terminals can talk to each other through a tiny file-based bus installed at `.forgeflow/bus/`. Each worker has an inbox log. A helper CLI `ff` lives at `.forgeflow/bin/ff` and is on `PATH` inside the spawned terminals.
+
+### Commands
+
+```bash
+ff send <worker> "<message>"     # send a message to a specific worker
+ff broadcast "<message>"         # send to all workers
+ff watch                         # tail your own inbox (live)
+ff recv                          # print and clear your inbox
+ff ls                            # list all inboxes and sizes
+ff clear <worker>                # truncate an inbox
+```
+
+Each terminal exports `FF_WORKER=<name>` automatically, so `send` knows who the sender is.
+
+### Example flow
+
+```text
+# in the backend terminal
+ff send frontend-web "GET /api/invoices now returns items:[] in dark-mode safe format"
+
+# in the frontend-web terminal
+ff recv
+# [14:22:07] from=backend: GET /api/invoices now returns items:[] in dark-mode safe format
+```
+
+### Layout with tmux
+
+Single window, tiled layout, mouse enabled. All workers visible at once.
+
+```
+┌────────────────┬────────────────┬────────────────┐
+│ repo-inspector │ frontend-web   │ backend        │
+│ claude         │ claude         │ claude         │
+│                │                │                │
+├────────────────┼────────────────┼────────────────┤
+│ mobile-rn      │ reviewer       │ bus monitor    │
+│ claude         │ claude         │ tail -F *.log  │
+│                │                │                │
+└────────────────┴────────────────┴────────────────┘
+```
+
+- **Click any pane** to focus it. Mouse is on.
+- **Drag splitters** with the mouse to resize panes.
+- **Scroll** inside a pane with the trackpad.
+- `Ctrl+b z` zooms the active pane to full screen, press again to restore.
+- `Ctrl+b arrow` moves focus with the keyboard.
+- `Ctrl+b d` detaches the session. Reattach with `tmux attach -t forgeflow`.
+
+The layout adapts to how many workers you spawn. `--workers=web` gives you 3 panes (frontend-web, reviewer, bus monitor), which is much roomier on a laptop screen.
+
+### Platform matrix
+
+| Platform | Default layout |
+|---|---|
+| macOS | tmux if installed, otherwise Terminal.app or iTerm2 windows |
+| Linux | tmux if installed, otherwise gnome-terminal / konsole / xterm / etc. |
+| Windows (WSL, MSYS2) | tmux if installed |
+| Windows (native) | Windows Terminal (`wt.exe`) split tabs, falls back to plain `cmd` windows |
+
+> tmux is **not** bundled with Windows. Options: use WSL (`sudo apt install tmux`), MSYS2 (`pacman -S tmux`), or skip tmux and use Windows Terminal with `--windows` mode. Plain CMD and PowerShell do not have tmux.
 
 ---
 

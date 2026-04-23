@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "title": "ForgeFlow AI",
+    "description": "Yapay zeka destekli çok ajanlı iş akışı otomasyonu"
+  },
+  "nav": {
+    "features": "Özellikler",
+    "howItWorks": "Nasıl Çalışır",
+    "docs": "Belgeler",
+    "getStarted": "Başlayın"
+  },
+  "hero": {
+    "badge": "Beta'da",
+    "headline1": "Birlikte çalışan",
+    "headline2": "yapay zeka ajanlarıyla",
+    "headline3": "daha hızlı geliştirin",
+    "subheadline": "ForgeFlow, kod tabanınızda uzmanlaşmış yapay zeka çalışanlarını yönetir. Frontend, backend, mobil ve gözden geçirme — her biri kapsamlı, koordineli ve token verimli.",
+    "cta": "Geliştirmeye Başla",
+    "ctaSecondary": "GitHub'da Gör"
+  },
+  "stats": {
+    "items": [
+      { "value": "6", "label": "Uzman çalışan" },
+      { "value": "2x", "label": "Daha hızlı teslimat" },
+      { "value": "70%", "label": "Daha az token" },
+      { "value": "100%", "label": "Kapsam izolasyonu" }
+    ]
+  },
+  "howItWorks": {
+    "heading": "ForgeFlow nasıl çalışır",
+    "subheading": "Görevden birleşime dört adım.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Sınıflandır",
+        "description": "Supervisor görevi okur ve hangi yüzeylere dokunulduğunu belirler — web, backend veya mobil — sonra yalnızca gerekli çalışanları etkinleştirir."
+      },
+      {
+        "number": "02",
+        "title": "İncele",
+        "description": "Repo-inspector, tek bir satır kod yazılmadan önce ilgili dosyaları, mevcut kalıpları ve riskleri haritalar."
+      },
+      {
+        "number": "03",
+        "title": "Uygula",
+        "description": "Kapsamlı çalışanlar kendi yüzeyleri içinde paralel olarak çalışır. Frontend backend'e dokunmaz. Mobil web'e dokunmaz."
+      },
+      {
+        "number": "04",
+        "title": "Gözden Geçir",
+        "description": "Özel bir gözden geçiren ajan yalnızca farkı ve doğrudan ilgili sözleşmeleri inceler. Regresyonları, boşlukları ve kalite sorunlarını işaret eder."
+      }
+    ]
+  },
+  "features": {
+    "heading": "Gerçek kod tabanları için tasarlandı",
+    "subheading": "Tahmin yok. Kapsam kayması yok. Boşa harcanan token yok.",
+    "items": [
+      {
+        "title": "Sıkı Kapsam Kuralları",
+        "description": "Frontend çalışanları backend dosyalarına dokunmaz. Mobil çalışanlar web dosyalarına dokunmaz. Kirlilik yapısal olarak imkânsızdır."
+      },
+      {
+        "title": "Önce İncele, Sonra Uygula",
+        "description": "Bir repo-inspector, herhangi bir kod yazılmadan önce ilgili dosyaları ve riskleri haritalar. Her değişiklik gerçekte var olan şeye dayanır."
+      },
+      {
+        "title": "Token Verimliliği",
+        "description": "Çalışanlar yalnızca ihtiyaç duydukları şeyleri okur. Tam repo taraması yok. Özetler, yeniden ifadeler yerine. Hızlı ve ucuz."
+      },
+      {
+        "title": "Çok Yüzey Koordinasyonu",
+        "description": "Web, backend ve mobil çalışanlar dosya tabanlı bir bus üzerinden koordine olur. Supervisor yalnızca görev için gerekli olanları etkinleştirir."
+      },
+      {
+        "title": "Karanlık Mod ve i18n",
+        "description": "Her UI yüzeyi, ilk commit'ten itibaren karanlık mod ve çok dilli destek ile birlikte gelir."
+      },
+      {
+        "title": "İnceleme Döngüsü",
+        "description": "Özel bir gözden geçiren ajan farklılıkları inceler ve regresyonları, boşlukları ve kalite sorunlarını işaret eder — tek satır yazmadan."
+      }
+    ]
+  },
+  "cta": {
+    "heading": "İş akışınızı forge etmeye hazır mısınız?",
+    "subheading": "Yapılandırılmış yapay zeka ajanlarıyla daha hızlı gönderim yapan ekiplere katılın.",
+    "button": "Erken Erişim Al",
+    "buttonSecondary": "Belgeleri Oku"
+  },
+  "footer": {
+    "tagline": "Gerçek kod tabanları için yapılandırılmış yapay zeka ajanları.",
+    "rights": "Tüm haklar saklıdır."
+  }
+}

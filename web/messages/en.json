@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "title": "ForgeFlow AI",
+    "description": "AI-powered multi-agent workflow automation"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "docs": "Docs",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "Now in Beta",
+    "headline1": "Ship faster with",
+    "headline2": "AI agents",
+    "headline3": "that work together",
+    "subheadline": "ForgeFlow orchestrates specialized AI workers across your codebase. Frontend, backend, mobile, and review — each scoped, coordinated, and token-efficient.",
+    "cta": "Start Building",
+    "ctaSecondary": "View on GitHub"
+  },
+  "stats": {
+    "items": [
+      { "value": "6", "label": "Specialized workers" },
+      { "value": "2x", "label": "Faster code delivery" },
+      { "value": "70%", "label": "Fewer token calls" },
+      { "value": "100%", "label": "Scope isolation" }
+    ]
+  },
+  "howItWorks": {
+    "heading": "How ForgeFlow works",
+    "subheading": "Four steps from task to merged code.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Classify",
+        "description": "The supervisor reads your task and identifies which surfaces it touches — web, backend, or mobile — then activates only the workers that are needed."
+      },
+      {
+        "number": "02",
+        "title": "Inspect",
+        "description": "The repo-inspector maps the relevant files, existing patterns, and risks before a single line of code is written."
+      },
+      {
+        "number": "03",
+        "title": "Implement",
+        "description": "Scoped workers execute in parallel within their surface. Frontend never touches backend. Mobile never touches web. Each worker ends with a completion marker."
+      },
+      {
+        "number": "04",
+        "title": "Review",
+        "description": "A dedicated reviewer agent inspects only the diff and directly related contracts. Flags regressions, gaps, and quality issues — then stops."
+      }
+    ]
+  },
+  "features": {
+    "heading": "Built for real codebases",
+    "subheading": "No guesswork. No scope creep. No wasted tokens.",
+    "items": [
+      {
+        "title": "Strict Scope Rules",
+        "description": "Frontend workers never touch backend files. Mobile workers never touch web files. Contamination is structurally impossible."
+      },
+      {
+        "title": "Inspect Before Implement",
+        "description": "A repo-inspector maps relevant files and risks before any code is written. Every change is grounded in what actually exists."
+      },
+      {
+        "title": "Token Efficiency",
+        "description": "Workers read only what they need. No full-repo scans. Summaries over restating. Fast and cheap at scale."
+      },
+      {
+        "title": "Multi-Surface Coordination",
+        "description": "Web, backend, and mobile workers coordinate through a file-based message bus. The supervisor activates only what the task needs."
+      },
+      {
+        "title": "Dark Mode and i18n",
+        "description": "Every UI surface ships with dark mode and multilingual support baked in from the first commit."
+      },
+      {
+        "title": "Reviewer in the Loop",
+        "description": "A dedicated reviewer inspects diffs and flags regressions, parity gaps, and quality issues — without rewriting a thing."
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Ready to forge your workflow?",
+    "subheading": "Join teams shipping faster with structured AI agents.",
+    "button": "Get Early Access",
+    "buttonSecondary": "Read the Docs"
+  },
+  "footer": {
+    "tagline": "Structured AI agents for real codebases.",
+    "rights": "All rights reserved."
+  }
+}

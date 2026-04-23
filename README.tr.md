@@ -27,6 +27,12 @@
 
 > **Çoğu çoklu ajan repo'su daha çok gürültü üretir. ForgeFlow AI daha çok odak üretir.**
 
+<br />
+
+![ForgeFlow AI 6 işçiyi tmux tiled düzeninde çalıştırıyor](docs/hero.png)
+
+<br />
+
 [Hızlı Başlangıç](#-hızlı-başlangıç) · [Ekip](#-ekip) · [Kullanım](#-örnek-kullanım) · [Çoklu dil kurulumu](#-çoklu-dil-readme-kurulumu) · [English README](README.md)
 
 </div>
@@ -102,64 +108,187 @@ ForgeFlow AI için UI kalitesi bir bonus değil, bir gereklilik.
 
 ---
 
+## 🎬 Demo
+
+![ForgeFlow AI demo](docs/demo.gif)
+
+---
+
 ## 🚀 Hızlı Başlangıç
 
 ### 1. Gereksinimler
 
 - [Claude Code](https://claude.com/claude-code) kurulu ve giriş yapılmış olmalı.
 - Çalışmak istediğin herhangi bir proje (Next.js, NestJS, Expo, React Native CLI, monorepo, fark etmez).
+- **tmux** (önerilir) split pane düzeni için. Installer yoksa otomatik kurmayı teklif eder. Manuel kurulum:
 
-### 2. Projene kur
+| Platform | Komut |
+|---|---|
+| macOS (Homebrew) | `brew install tmux` |
+| Ubuntu / Debian | `sudo apt-get install tmux` |
+| Fedora | `sudo dnf install tmux` |
+| Arch | `sudo pacman -S tmux` |
+| Alpine | `sudo apk add tmux` |
+| Windows + MSYS2 | `pacman -S tmux` |
+| Windows + WSL | WSL içinde Ubuntu/Debian komutunu çalıştır |
+| Windows (native) | tmux yok, Windows Terminal ile `--windows` modunu kullan |
 
-**A seçeneği: yeni proje olarak klonla**
+### 2. Tek komutla kurulum
+
+Herhangi bir projenin kök klasöründen:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/berkcangumusisik/forge-flow-ai/main/install.sh | bash
+```
+
+Ya da hedef klasörü ver:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/berkcangumusisik/forge-flow-ai/main/install.sh | bash -s -- /path/to/project
+```
+
+Installer şunları yapar:
+
+1. `.claude/` ve `CLAUDE.md` dosyalarını projene kopyalar.
+2. Terminaller arası mesaj bus'ını `.forgeflow/` altına kurar.
+3. **5 Claude Code worker terminali** açar: `repo-inspector`, `frontend-web`, `backend`, `mobile-react-native`, `reviewer`.
+
+#### Manuel kurulum (alternatif)
 
 ```bash
 git clone https://github.com/berkcangumusisik/forge-flow-ai.git
 cd forge-flow-ai
+./install.sh /path/to/your/project
 ```
 
-**B seçeneği: var olan projenin içine `.claude` klasörünü at**
+#### Installer flagleri
+
+```text
+./install.sh [target-dir] [--no-spawn] [--tmux|--windows] [--workers=<set>]
+```
+
+| Flag | Etki |
+|---|---|
+| `--no-spawn` | Sadece dosyaları kopyalar, terminal açmaz |
+| `--tmux` | tmux tiled düzenini zorla (tek pencere, tüm pane'ler bir ekranda) |
+| `--windows` | Ayrı terminal pencerelerini zorla |
+| `--workers=<set>` | Hangi worker'ların açılacağını seç (aşağıdaki preset'lere bak) |
+
+Varsayılan: tmux varsa kullanır (yoksa kurmayı teklif eder), yoksa ayrı pencereler. Default olarak 5 worker hepsi açılır.
+
+#### Worker preset'leri
+
+Görevin gerektirdiği en küçük seti seç. Küçük set = büyük pane = göze kolay.
+
+| Preset | Açılan worker'lar |
+|---|---|
+| `--workers=web` | `frontend-web`, `reviewer` |
+| `--workers=backend` | `backend`, `reviewer` |
+| `--workers=backend-only` | `backend` |
+| `--workers=full-stack` | `frontend-web`, `backend`, `reviewer` |
+| `--workers=mobile` | `mobile-react-native`, `reviewer` |
+| `--workers=all` | 5'i birden (default) |
+| `--workers=a,b,c` | Elle, virgülle ayrılmış worker isimleri |
+
+#### Örnekler
 
 ```bash
-# projenin kök klasöründe
-git clone --depth=1 https://github.com/berkcangumusisik/forge-flow-ai.git /tmp/forge-flow-ai
-cp -R /tmp/forge-flow-ai/.claude ./
-cp /tmp/forge-flow-ai/CLAUDE.md ./
-rm -rf /tmp/forge-flow-ai
+# Full stack (web + backend)
+./install.sh ~/Desktop/my-app --tmux --workers=full-stack
+
+# Landing page ya da saf web işi
+./install.sh ~/Desktop/site --tmux --workers=web
+
+# Saf API projesi
+./install.sh ~/Desktop/api --tmux --workers=backend
+
+# Sadece mobil
+./install.sh ~/Desktop/mobile-app --tmux --workers=mobile
+
+# Elle seçim
+./install.sh ~/Desktop/proj --tmux --workers=frontend-web,backend,reviewer
+
+# Hepsi, tmux düzeni
+./install.sh ~/Desktop/proj --tmux
 ```
 
-**C seçeneği: git submodule olarak ekle**
+Bus her zaman tüm worker'lar için kurulur, açmasan bile inbox'ları var. İstediğin zaman installer'ı farklı `--workers` set'iyle yeniden çalıştırıp daha fazla worker açabilirsin.
 
-```bash
-git submodule add https://github.com/berkcangumusisik/forge-flow-ai.git .forge-flow-ai
-ln -s .forge-flow-ai/.claude .claude
-ln -s .forge-flow-ai/CLAUDE.md CLAUDE.md
-```
+### 3. İlk görevi çalıştır
 
-### 3. Projeyi Claude Code'da aç
-
-```bash
-claude
-```
-
-Claude Code `.claude/commands/`, `.claude/agents/` ve `.claude/skills/` klasörlerini otomatik yükler. Komut listesinde `/forgeflow` görünmeli.
-
-### 4. İlk görevi çalıştır
-
-Claude Code içinde yaz:
+5 terminalden herhangi birinde yaz:
 
 ```text
 /forgeflow tema ve dil seçimli bir ayarlar sayfası ekle
 ```
 
-ForgeFlow AI şunları yapar:
+`supervisor` görevi sınıflar, sadece gereken işçileri devreye alır ve yönlendirir. Her işçi `DONE:<agent>:<task-id>` ile biter.
 
-1. Görevi sınıflar.
-2. Alan yabancıysa `repo-inspector`'ı çalıştırır.
-3. Sadece gereken işçileri devreye alır.
-4. Katı scope içinde değişikliği uygular.
-5. `reviewer`'ı diff üzerinde çalıştırır.
-6. `DONE:<agent>:<task-id>` işaretleriyle rapor verir.
+---
+
+## 📡 Terminaller arası haberleşme
+
+5 terminal birbirine `.forgeflow/bus/` altındaki dosya tabanlı bus üzerinden konuşur. Her işçinin bir inbox log dosyası var. Yardımcı CLI `ff` dosyası `.forgeflow/bin/ff`'te ve spawn edilen terminallerin `PATH`'inde bulunur.
+
+### Komutlar
+
+```bash
+ff send <worker> "<mesaj>"       # belirli bir işçiye gönder
+ff broadcast "<mesaj>"           # tüm işçilere gönder
+ff watch                         # kendi inbox'ını canlı izle
+ff recv                          # inbox'ı oku ve temizle
+ff ls                            # tüm inbox'ları ve satır sayılarını listele
+ff clear <worker>                # inbox'ı sıfırla
+```
+
+Her terminal otomatik olarak `FF_WORKER=<ad>` export eder, böylece `send` göndereni bilir.
+
+### Örnek akış
+
+```text
+# backend terminalinde
+ff send frontend-web "GET /api/invoices artık items:[] formatında dönüyor"
+
+# frontend-web terminalinde
+ff recv
+# [14:22:07] from=backend: GET /api/invoices artık items:[] formatında dönüyor
+```
+
+### tmux düzeni
+
+Tek pencere, tiled düzen, mouse açık. Tüm worker'lar aynı ekranda.
+
+```
+┌────────────────┬────────────────┬────────────────┐
+│ repo-inspector │ frontend-web   │ backend        │
+│ claude         │ claude         │ claude         │
+│                │                │                │
+├────────────────┼────────────────┼────────────────┤
+│ mobile-rn      │ reviewer       │ bus monitor    │
+│ claude         │ claude         │ tail -F *.log  │
+│                │                │                │
+└────────────────┴────────────────┴────────────────┘
+```
+
+- **Pane'e tıkla** → o pane aktif olur, mouse açık.
+- **Splitter'ları sürükle** → pane boyutlarını ayarla.
+- **Scroll** → trackpad ile pane içinde kaydır.
+- `Ctrl+b z` → aktif pane'i tam ekran yap, tekrar bas geri dön.
+- `Ctrl+b ok tuşları` → klavyeyle pane değiştir.
+- `Ctrl+b d` → session'dan ayrıl. Geri dön: `tmux attach -t forgeflow`.
+
+Düzen worker sayısına göre otomatik ayarlanır. `--workers=web` sana 3 pane verir (frontend-web, reviewer, bus monitor), laptop ekranında çok daha rahat.
+
+### Platform matrisi
+
+| Platform | Varsayılan düzen |
+|---|---|
+| macOS | tmux varsa kullanır, yoksa Terminal.app veya iTerm2 pencereleri |
+| Linux | tmux varsa kullanır, yoksa gnome-terminal / konsole / xterm vb. |
+| Windows (WSL, MSYS2) | tmux varsa kullanır |
+| Windows (native) | Windows Terminal (`wt.exe`) split tabs, yoksa düz `cmd` pencereleri |
+
+> tmux Windows'ta **hazır gelmez**. Seçenekler: WSL (`sudo apt install tmux`), MSYS2 (`pacman -S tmux`), ya da tmux'u atla ve `--windows` modu ile Windows Terminal kullan. Düz CMD ve PowerShell'de tmux yoktur.
 
 ---
 

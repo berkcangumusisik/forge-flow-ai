@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+#
+# ff: ForgeFlow AI message bus
+#
+# A tiny file-based bus so worker terminals can talk to each other.
+# Each worker has an inbox at .forgeflow/bus/<worker>.log
+#
+# Usage:
+#   ff send <to> <message...>       # append a message to a worker's inbox
+#   ff broadcast <message...>       # send to all workers
+#   ff watch [<worker>]             # tail -f a worker's inbox (default: $FF_WORKER)
+#   ff recv [<worker>]              # print and clear inbox
+#   ff clear [<worker>]             # truncate inbox
+#   ff ls                           # list workers and inbox sizes
+#
+# Each terminal should export FF_WORKER=<name> so `send` knows the sender.
+#
+set -euo pipefail
+
+WORKERS=(supervisor repo-inspector frontend-web backend mobile-react-native reviewer)
+
+# Find project root: walk up until we see .forgeflow/ or .claude/
+find_root() {
+  local d
+  d="$(pwd)"
+  while [ "$d" != "/" ]; do
+    if [ -d "$d/.forgeflow" ] || [ -d "$d/.claude" ]; then
+      echo "$d"; return 0
+    fi
+    d="$(dirname "$d")"
+  done
+  echo "$(pwd)"
+}
+
+ROOT="$(find_root)"
+BUS="$ROOT/.forgeflow/bus"
+mkdir -p "$BUS"
+
+inbox_for() {
+  local w="$1"
+  echo "$BUS/$w.log"
+}
+
+is_worker() {
+  local w="$1"
+  for x in "${WORKERS[@]}"; do [ "$x" = "$w" ] && return 0; done
+  return 1
+}
+
+now() { date "+%H:%M:%S"; }
+
+cmd_send() {
+  local to="${1:-}"; shift || true
+  local msg="$*"
+  if [ -z "$to" ] || [ -z "$msg" ]; then
+    echo "usage: ff send <to> <message...>" >&2; exit 1
+  fi
+  if [ "$to" != "all" ] && ! is_worker "$to"; then
+    echo "unknown worker: $to" >&2; exit 1
+  fi
+  local from="${FF_WORKER:-anon}"
+
+  if [ "$to" = "all" ]; then
+    for w in "${WORKERS[@]}"; do
+      [ "$w" = "$from" ] && continue
+      printf "[%s] from=%s: %s\n" "$(now)" "$from" "$msg" >> "$(inbox_for "$w")"
+    done
+    echo "sent to all ($from)"
+  else
+    printf "[%s] from=%s: %s\n" "$(now)" "$from" "$msg" >> "$(inbox_for "$to")"
+    echo "sent to $to"
+  fi
+}
+
+cmd_broadcast() {
+  cmd_send all "$@"
+}
+
+cmd_watch() {
+  local w="${1:-${FF_WORKER:-}}"
+  [ -z "$w" ] && { echo "usage: ff watch <worker>  (or export FF_WORKER)" >&2; exit 1; }
+  is_worker "$w" || { echo "unknown worker: $w" >&2; exit 1; }
+  local f; f="$(inbox_for "$w")"
+  touch "$f"
+  echo "watching $w inbox: $f"
+  tail -n 0 -f "$f"
+}
+
+cmd_recv() {
+  local w="${1:-${FF_WORKER:-}}"
+  [ -z "$w" ] && { echo "usage: ff recv <worker>  (or export FF_WORKER)" >&2; exit 1; }
+  is_worker "$w" || { echo "unknown worker: $w" >&2; exit 1; }
+  local f; f="$(inbox_for "$w")"
+  [ -f "$f" ] || { echo "(empty)"; return 0; }
+  cat "$f"
+  : > "$f"
+}
+
+cmd_clear() {
+  local w="${1:-${FF_WORKER:-}}"
+  [ -z "$w" ] && { echo "usage: ff clear <worker>" >&2; exit 1; }
+  is_worker "$w" || { echo "unknown worker: $w" >&2; exit 1; }
+  : > "$(inbox_for "$w")"
+  echo "cleared $w"
+}
+
+cmd_ls() {
+  printf "%-22s %8s  %s\n" "worker" "lines" "inbox"
+  for w in "${WORKERS[@]}"; do
+    local f; f="$(inbox_for "$w")"
+    touch "$f"
+    local n; n="$(wc -l < "$f" | tr -d ' ')"
+    printf "%-22s %8s  %s\n" "$w" "$n" "$f"
+  done
+}
+
+case "${1:-}" in
+  send)      shift; cmd_send "$@" ;;
+  broadcast) shift; cmd_broadcast "$@" ;;
+  watch)     shift; cmd_watch "${1:-}" ;;
+  recv)      shift; cmd_recv "${1:-}" ;;
+  clear)     shift; cmd_clear "${1:-}" ;;
+  ls|list)   cmd_ls ;;
+  ""|-h|--help)
+    sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
+    ;;
+  *) echo "unknown command: $1" >&2; exit 1 ;;
+esac
